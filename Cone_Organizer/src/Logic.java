@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import net.fortuna.ical4j.model.DateList;
+
 import com.joestelmach.natty.DateGroup;
 
 public class Logic {
@@ -329,13 +331,18 @@ public class Logic {
 	}
 	
 	public ArrayList<Tasks> displayTasks(ArrayList<Tasks> list, String dateStr){
-		ArrayList<Tasks> temp = new ArrayList<Tasks>();	
-		temp.addAll(list);
-		
+		ArrayList<Tasks> floating = new ArrayList<Tasks>();	
+		ArrayList<Tasks> timed = new ArrayList<Tasks>();	
 		Date date = getDate(dateStr);
-		temp.addAll(getTaskWithRange(temp, date));
-		sortList(temp);
+		
+		floating.addAll(getFloatTasks(list));
+		timed.addAll(getTimedTasks(list));
+		floating.addAll(getTaskWithRange(timed, date));
+		
+		list.clear();
+		list.addAll(floating);
+		sortList(list);
 	
-		return temp;
+		return list;
 	}
 }
