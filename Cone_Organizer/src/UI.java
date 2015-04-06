@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -32,6 +33,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
+
+import org.junit.runners.model.FrameworkField;
 
 @SuppressWarnings("serial")
 public class UI extends JFrame {
@@ -54,8 +57,7 @@ public class UI extends JFrame {
 			"Start Date", "End Date" };
 	protected static String print_what = "entire";
 	static DefaultTableModel tableModel = new DefaultTableModel(columns, 0);
-	
-	
+
 	public UI() {
 		setTitle("test Program");
 		setSize(700, 500);
@@ -292,7 +294,9 @@ public class UI extends JFrame {
 	}
 
 	protected static void printWhat(String printWhat, ArrayList<Tasks> list, String keyword) {
+		
 		ArrayList<Tasks> displayList = new ArrayList<Tasks>();
+		
 		switch (printWhat) {
 		case "weeks": {
 			printList_weeks(displayList, keyword);
@@ -307,7 +311,7 @@ public class UI extends JFrame {
 			break;
 		}
 		case "entire": {
-			printList_entire(displayList, keyword);
+			printList_entire(list, keyword);
 			break;
 		}
 		}
@@ -316,23 +320,36 @@ public class UI extends JFrame {
 
 	private static void printList_today(ArrayList<Tasks> list, String keyword) {
 		ArrayList<Tasks> sortedListD = new ArrayList<Tasks>();
-		sortedListD.addAll(l.displayTasks(list, "23:59:59 today"));
-		printList_entire(sortedListD, keyword);		
+		String key = keyword;
+		Date today = l.getDate("23:59:59 today");
+		Date yesterday = l.getDate("23:59:59 yesterday");
+		
+		for (int i=0;i<list.size();i++) {
+			String dateStr = list.get(i).endDate;
+			Date date = l.getDate(dateStr);
+			if(date.after(yesterday) && date.before(today))
+				sortedListD.add(list.get(i));
+		}
+		printList(sortedListD, key);		
 	}
 
 	private static void printList_weeks(ArrayList<Tasks> list, String keyword) {
 		ArrayList<Tasks> sortedListW = new ArrayList<Tasks>();
 		sortedListW.addAll(l.displayTasks(list, "23:59:59 in 1 week" ));
-		printList_entire(sortedListW, keyword);
+		printList(sortedListW, keyword);
 	}
 	
 	private static void printList_month(ArrayList<Tasks> list, String keyword) {
 		ArrayList<Tasks> sortedList = new ArrayList<Tasks>();
 		sortedList.addAll(l.displayTasks(list, "23:59:59 next month" ));
-		printList_entire(sortedList, keyword);
+		printList(sortedList, keyword);
+	}
+	
+	private static void printList_entire(ArrayList<Tasks> list, String keyword) {
+		printList(list, keyword);
 	}
 
-	protected static void printList_entire(ArrayList<Tasks> list, String keyword) {
+	protected static void printList(ArrayList<Tasks> list, String keyword) {
 		clearTable();
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).detail.contains(keyword)

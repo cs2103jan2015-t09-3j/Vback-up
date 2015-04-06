@@ -1,3 +1,5 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -16,7 +18,7 @@ public class Logic {
 	ArrayList<Tasks> tempList = new ArrayList<Tasks>();
 	ArrayList<Tasks> currList = new ArrayList<Tasks>();
 	static String command_type = DEFAULT_STRING;
-	
+
 
 	int edit = 0;
 
@@ -43,7 +45,8 @@ public class Logic {
 		return feedback;
 	}
 
-	public String implementCommand(String command_type, Tasks cmd, ArrayList<Tasks> list, String feedback) {
+	public String implementCommand(String command_type, Tasks cmd,
+			ArrayList<Tasks> list, String feedback) {
 		switch (command_type) {
 		case "cd": {
 			s.changeDirectory(cmd.detail);
@@ -82,13 +85,8 @@ public class Logic {
 		}
 	}
 
-	private void sortList(ArrayList<Tasks> list) {
-
-		sortByMark(list);
-	}
-
 	
-
+	
 	/**
 	 * This method imports items in the text file currently saved in same
 	 * directory and put them in the array list.
@@ -232,6 +230,10 @@ public class Logic {
 		
 	}
 	
+	private void sortList(ArrayList<Tasks> list) {
+		sortByMark(list);
+	}
+
 	public Date getDate(String date_input){
 		DateGroup group= new DateGroup();
 		
@@ -302,19 +304,22 @@ public class Logic {
 		list.addAll(markSort);
 
 	}
-	
+
 	private ArrayList<Tasks> getTaskWithRange(ArrayList<Tasks> list, Date dateScope){
-		ArrayList<Tasks> temp = new ArrayList<Tasks>();
-	    Date today = getDate("today");	
+		ArrayList<Tasks> temp = new ArrayList<Tasks>();	
+		Date today = getDate("23:59:59 today");
+		Date yesterday = getDate("23:59:59 yesterday");
 		
 		for(int i=0; i<list.size(); i++){
 			String date_input = list.get(i).endDate;
 			Date date = getDate(date_input);
 			
-			if(date.equals(today)){
-				if(date.equals(dateScope))
+			// get today's todo tasks
+			if(dateScope.equals(today)){
+				if(date.before(today) && date.after(yesterday))
 					temp.add(list.get(i));
 			}
+			
 			else{
 				if(!date.after(dateScope))
 					temp.add(list.get(i));
@@ -324,14 +329,13 @@ public class Logic {
 	}
 	
 	public ArrayList<Tasks> displayTasks(ArrayList<Tasks> list, String dateStr){
+		ArrayList<Tasks> temp = new ArrayList<Tasks>();	
+		temp.addAll(list);
+		
 		Date date = getDate(dateStr);
-		list.clear();
-		list.addAll(getTaskWithRange(list, date));
-		sortList(list);
+		temp.addAll(getTaskWithRange(temp, date));
+		sortList(temp);
 	
-		return list;
+		return temp;
 	}
-	
 }
-	
-	
